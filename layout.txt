@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <!--
+    BLOCK 1: page_title 
+    BLOCK 2: extend_library
+    BLOCK 3: style
+    BLOCK 4: content
+    -->
+
+        <!--BLOCK 1: page_title -->
+        <title>                                 
+            {% block page_title %} AI Central  {% endblock %} 
+        </title>
+        
+        <!-- stylesheet For icon -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        
+        <!-- stylesheet for most of the w3 class -->
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+        
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        
+        <!--BLOCK 2: extend_library -->
+        {% block extend_library %}
+        {% endblock %} 
+        
+        <!--BLOCK 3: style -->
+        {% block style%}
+            <style>
+                body,h1 {font-family: "Raleway", sans-serif}
+                body, html {height: 100%; overflow:hidden;}
+                .bgimg {
+            		  background-image: url('{{asset('frontend_assets/index-neural-network.png')}}');
+            		  height: 100%;
+            		  background-position: center;
+            		  background-size: cover;
+                }
+            </style>
+        {% endblock %}
+    </head>
+    
+    
+    <body>
+
+        <!--Navigation bar-->
+    
+        {% set navStartNode = document.getProperty('navigation_root') %}
+        {% if not navStartNode is instanceof('\\Pimcore\\Model\\Document\\Page')  %}
+            {% if pimcore_site_is_request() %}
+                {% set site = pimcore_site_current() %}
+                {% set navStartNode = site.getRootDocument() %}
+                
+            {% else %}
+                {% set navStartNode = pimcore_document(1) %}
+            {% endif %}
+        {% endif %}
+        
+        {% set mainNavigation = pimcore_build_nav({active: document, root: navStartNode}) %} 
+        
+        {% set menuRenderer = pimcore_nav_renderer('menu') %}
+        {% set mainpage = pimcore_document(1) %}
+    
+        <nav class="navbar navbar-expand-sm navbar-light bg-light">
+            <a class="navbar-brand" href="{{mainpage.getHref()}}">Home</a>
+            <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#collapsibleNavId" aria-controls="collapsibleNavId"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                    {% for page in mainNavigation %}
+                        {# here need to manually check for ACL conditions #}
+                        {% if page.isVisible() and menuRenderer.accept(page)  %}
+                            {% set hasChildren = page.hasPages() %}
+                            {% if not hasChildren %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ page.getHref() }}">{{ page.getLabel()|trans }}</a>
+                                </li>
+                            {% else %}
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="{{ page.getHref() }}" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ page.getLabel()|trans }}</a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                        {% for child in page.getPages() %}
+                                            {% if child.isVisible() and menuRenderer.accept(child) %}
+                                                    <a class="dropdown-item" href="{{ child.getHref() }}">{{ child.getLabel()|trans }}</a>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </nav>
+            
+    	<!-- end of side navigation bar section -->
+        
+        <!--BLOCK 4: content -->
+        {% block content %}
+        
+            <!-- Displaying the text (title) -->
+            <div class="bgimg">
+                <div class="w3-display-middle">
+                    <!-- use pimcore_input so changes on the page title can be made from the fron-end -->
+                    <h1 class="w3-jumbo w3-animate-top" style="color: black;"> 
+                        {{ pimcore_input("page_title", {'width':650, 'placeholder' : "TM ONE AI DevOps"}) }}
+                        {% if pimcore_input("page_title").isEmpty() %}
+                            <h1 class="w3-jumbo w3-animate-top" style="color: black;">TM ONE AI DevOps</h1>
+                        {% endif%}
+                    </h1>
+                    <hr style="margin:auto;width:70%;border-width:4px; border-color:#00aede">
+                </div>
+            </div>
+  
+        {% endblock %}
+    
+    
+    <!--footer bar omitted -->
+    </body>
+</html>
