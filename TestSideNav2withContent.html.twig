@@ -1,0 +1,125 @@
+{% extends 'TestSideNav2.html.twig' %}
+
+{# SOURCE: https://fullcalendar.io/docs/google-calendar #}
+
+{# Block 2: Extend Library #}
+{% block extend_library %}
+  <link href='/assets/demo-to-codepen.css' rel='stylesheet' />
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
+  <script src='/assets/demo-to-codepen.js'></script>
+  <link href='fullcalendar/main.css' rel='stylesheet' />
+  <script src='fullcalendar/main.js'></script>
+  
+{% endblock %}
+
+{# Block 3: Style #} 
+{% block style%}
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+        }
+        
+        #calendar {
+          max-width: 1100px;
+          margin: 40px auto;
+        }
+    </style>
+{% endblock %}
+
+
+{# Block 4: Content #}
+{% block content %}
+    <!-- page title -->
+    <br/>
+    <h2 class="w3-center w3-animate-top" style="color: black;margin:auto;margin-top:25px;">
+        {{ pimcore_input("page_title", {'font-size':50}) }}
+    </h2>
+    <hr style="margin:auto;width:20%;border-width:4px; border-color:#00aede; margin-bottom:50px;"> 
+    <br/>
+    
+   <!-- script for Calendar -->
+    
+   <!-- script for Calendar -->
+   <script>
+    var allEventList = []; 
+   
+   {%for event in eventList%}
+       allEventList.push({
+           title: '{{event.getEventName()}}',
+           start: '{{event.getStartDateTime()}}',
+           end: '{{event.getEndDateTime()}}',
+           allDay: ('{{event.getAllDayEvent()}}' ) ? true :false,
+           color: '{{event.getEventType()}}',
+       });
+   {% endfor %}
+
+    // console.log(allEventList);
+
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+    
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'timeGridDay,timeGridWeek,dayGridMonth,listYear'
+            },
+            
+            displayEventTime: false, // don't show the time column in list view
+            timeZone: 'UTC+8',
+            
+            //Note: Ive generated the key: 'AIzaSyD2LmHsqpdom77ZpRlIm67YKlUmU93dqYU' but hacent used it yet
+            googleCalendarApiKey: 'AIzaSyDcnW6WejpTOCffshGDDb4neIrXVUA1EAE',
+            
+            //my personal calendar ID: afd0d7rrs1qjfv1ekvungf25q4@group.calendar.google.com
+            // US Holidays (using the event holiday provided by the source as for now)
+            //   events: 'en.usa#holiday@group.v.calendar.google.com',
+            
+            events : allEventList, 
+                    
+            eventSources: [
+                {
+                    googleCalendarId: 'en.malaysia#holiday@group.v.calendar.google.com',
+                    color: '#2E8B57',    // an option!
+                },
+            ],
+            
+            eventClick: function(arg) {
+                // prevents current tab from navigating
+                arg.jsEvent.preventDefault();
+                
+                var eventObj = arg.event;
+                console.log(eventObj);
+                if (eventObj.url){
+                    // opens events in a popup window
+                    window.open(arg.event.url, '_blank', 'width=700,height=600');
+                }
+                else{
+                    var startDate = new Date(eventObj.start).toUTCString(); 
+                    var endDate = new Date(eventObj.end).toUTCString(); 
+                    var allDay = eventObj.allDay? 'Yes' :'No'
+                    alert(
+                    'Event Name: ' + eventObj.title+'\n'+
+                    'All Day Event: ' + allDay + '\n' +
+                    'Start date: ' + startDate + '\n' + 
+                    'End  date: ' + endDate + '\n' 
+                    
+                    
+                    )
+                }
+            },
+        });
+    
+        calendar.render();
+      });
+    </script>
+    </head>
+    
+    <body>
+      <div id='calendar'></div>
+    </body>
+    
+{% endblock %}
