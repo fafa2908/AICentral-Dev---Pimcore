@@ -206,13 +206,47 @@
         .dropdown-nav:hover .dropdown-container{
         display:block;
         }
+  
+                
+        /* for submenu within submenu */
+        #dropdown2-container {
+        	  display: none;
+        	  max-width:260px;
+        	  padding-left:0px;
+        	  margin-left:0px;
+        	  border-top: 0.5px solid #00aede;
+        }
+        .dropdown2-nav {
+        	color:white;
+        	 background-color: rgb(194, 194, 194);
+        }
+        
+        #dropdown2-container a {
+        	color: #5e5e5e;
+        	display:block;
+        	padding: 10px 0px;
+        	text-decoration: none;
+        	padding-left: 50px;
+        	font-size:13px;
+        	font-weight: 700;
+        }
+        #dropdown2-a:hover{
+        	color: #e87722;
+        	font-weight: bold;
+        	background-color: rgb(194, 194, 194);
+        }
+        
+        .dropdown2-nav:hover #dropdown2-container{
+        	display:block;
+        }
+        
         
         /* for profile and logout icon */
         #logout-profile-icon:hover{
-    	background:rgba(110, 110, 110, 0);
-    	color: #6cdeff;
+        	background:rgba(110, 110, 110, 0);
+        	color: #6cdeff;
         }
-    
+
     </style>
         
         {# BLOCK 2: extend_library #}
@@ -256,6 +290,8 @@
               ITAssetManagement: 'table',
               
               APITest: 'table',
+              UserProfile: 'user',
+              layout2: 'github'
               }
         %}
         
@@ -297,7 +333,21 @@
 								<div class="dropdown-container">
 									{% for child in page.getPages() %}
 										{% if child.isVisible() and menuRenderer.accept(child) %}
-												<a id="dropdown-a" href="{{ child.getHref() }}">{{ child.getLabel()|trans }}</a>
+    										{% set hasChildren2 = child.hasPages() %} {# check if  submenu within submenu is present #}
+    										{% if not hasChildren2 %}
+    											<a id="dropdown-a" href="{{ child.getHref() }}">{{ child.getLabel()|trans }}</a>
+    										{% else %}
+    										    <span class="dropdown2-nav">
+    										        <a href="{{ child.getHref() }}" id="dropdown-a">{{ child.getLabel()|trans }}</a>
+    										        <!-- dropdown container for sub sub-menu -->
+                                					<div id="dropdown2-container" id="dropdown2-a">
+                                					    {% for child2 in child.getPages() %}
+    									                	{% if child2.isVisible() and menuRenderer.accept(child2) %} 
+    									                    	<a href="{{ child2.getHref() }}" id="dropdown2-a">{{ child2.getLabel()|trans }}</a> 
+									                        {% endif %}
+								                        {% endfor %}
+                                					</div>
+										{% endif %}
 										{% endif %}
 									{% endfor %}
 								</div>
